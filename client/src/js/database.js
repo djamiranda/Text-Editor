@@ -1,45 +1,56 @@
 import { openDB } from 'idb';
 
-const initdb = async () =>
+// Function to initialize the database.
+const initdb = async () => {
+    // Open the 'jate' database with version 1.
     openDB('jate', 1, {
         upgrade(db) {
+            // Check if the object store 'jate' already exists.
             if (db.objectStoreNames.contains('jate')) {
                 console.log('jate database already exists');
                 return;
             }
+            // If it doesn't exist, create a new object store 'jate'.
             db.createObjectStore('jate', {
-                keyPath: 'id',
-                autoIncrement: true,
+                keyPath: 'id', // Use 'id' as the key path for objects.
+                autoIncrement: true, // Automatically increment the 'id'.
             });
             console.log('jate database created');
         },
     });
+};
 
-// TODO: Add logic to a method that accepts some content and adds it to the database
+// Function to add content to the database.
 export const putDb = async (content) => {
     console.log('PUT to the database');
+    // Open the 'jate' database with version 1.
     const jateDb = await openDB('jate', 1);
+    // Start a new transaction with read-write access.
     const tx = jateDb.transaction('jate', 'readwrite');
+    // Open the 'jate' object store.
     const store = tx.objectStore('jate');
+    // Put the content into the object store with an auto-generated 'id'.
     const request = store.put({ id: 1, value: content });
+    // Wait for the request to complete.
     const result = await request;
     console.log('🚀 - data saved to the database', result);
 };
 
-// TODO: Add logic for a method that gets all the content from the database
+// Function to retrieve all content from the database.
 export const getDb = async () => {
-    // Create a connection to the database database and version we want to use.
+    // Open the 'jate' database with version 1.
     const jateDb = await openDB('jate', 1);
-    // Create a new transaction and specify the database and data privileges.
+    // Start a new transaction with read-only access.
     const tx = jateDb.transaction('jate', 'readonly');
-    // Open up the desired object store.
+    // Open the 'jate' object store.
     const store = tx.objectStore('jate');
-    // Use the .getAll() method to get all data in the database.
+    // Use the .getAll() method to retrieve all data in the object store.
     const request = store.getAll();
-    // Get confirmation of the request.
+    // Wait for the request to complete and get the result.
     const result = await request;
     console.log('result.value', result);
-    return result.value;
+    return result.value; // Return the retrieved data.
 };
 
+// Initialize the database when the module is imported.
 initdb();
